@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response, status, HTTPException
 from fastapi import Body
 from pydantic import BaseModel
 from typing import Optional
@@ -11,20 +11,37 @@ class Post(BaseModel):
     Published: bool = True
     Rating: Optional[int] = None
 
+my_posts = [{"Title": "Title of first post", "Content": "Content of first post", "id": 1}, 
+            {"Title": "Title of second post", "Content": "Content of second post", "id": 2}]
+
+post_id_counter = 3
+
 @app.get("/")
 def read_root():
     return {"message": "Hello, Ranchi!"}
 
 @app.get("/posts")
 def get_posts():
-    return {"data": "This is your posts data"}
+    return {"data": my_posts}
 
-@app.post("/create-post")
+@app.post("/posts", status_code=status.HTTP_201_CREATED)
 def create_post(post: Post):
-    print(post.Rating)
-    print(post.dict())
-    return {"data": post}
+    global post_id_counter
+    post_dict = post.dict()
+    post_dict['id'] = post_id_counter
+    my_posts.append(post_dict)
+    post_id_counter += 1
+    return {"data": post_dict}
 
+@app.get("/posts/{post_id}")
+def get_a_post(post_id: int, response: Response):
+    for post in my_posts:
+        if post['id'] == post_id:
+            return {"requested post": post}
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"post with id {post_id} not found")
+
+# https://youtu.be/0sOvCWFmrtA?si=qayl0VSyhTg8dgED&t=4967
 
 
 

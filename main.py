@@ -41,7 +41,19 @@ def get_a_post(post_id: int, response: Response):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                         detail=f"post with id {post_id} not found")
 
+@app.delete("/posts/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_post(post_id: int):
+    global my_posts
+    original_length = len(my_posts)
+    my_posts = [post for post in my_posts if post['id'] != post_id]
+
+    if len(my_posts) == original_length:
+        # No post was deleted
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"post with id {post_id} not found"
+        )
+
+    return
+
 # https://youtu.be/0sOvCWFmrtA?si=qayl0VSyhTg8dgED&t=4967
-
-
-

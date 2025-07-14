@@ -1,2 +1,3 @@
- __pycache__/
-        fapivenv/
+__pycache__/
+*.pyc
+fapivenv/

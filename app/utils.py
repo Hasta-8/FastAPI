@@ -5,4 +5,4 @@ def hash(password: str) -> str:
     """
     Hash a password using bcrypt.
     """
-    return pwd_context.hash(password)
+    return pwd_context.hash(password) 

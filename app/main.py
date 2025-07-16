@@ -4,12 +4,13 @@ from typing import List
 import time
 from psycopg2.extras import RealDictCursor
 from sqlalchemy.orm import Session
-from . import models, schemas
+from . import models, schemas, utils
 from .database import engine, get_db
 
-models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+models.Base.metadata.create_all(bind=engine) # Create all tables in the database
+
+app = FastAPI() # Initialize FastAPI application
 
 # Database connection setup using psycopg2
 max_retries = 5
@@ -100,8 +101,17 @@ def update_post(post_id: int, updated_post: schemas.PostCreate, db: Session = De
 # This part is for users manipulation==============================================================================================
 @app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.UserResponse) # This endpoint creates a new user
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    user.password = utils.hash(user.password)  # Hash the password before storing it
     new_user = models.User(**user.model_dump())
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
     return new_user
+
+@app.get("/users/{user_id}", response_model=schemas.UserResponse) # This endpoint retrieves a specific user by their ID
+def get_user(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if user:
+        return user
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+                        detail=f"user with id {user_id} not found")

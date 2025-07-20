@@ -10,13 +10,13 @@ router = APIRouter(
 )
 
 
-# This part is for posts manipulation==============================================================================================
+#============================================GET ALL POSTS========================================================
 @router.get("/", response_model=List[schemas.PostResponse]) # This endpoint returns all posts
 def get_posts(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     posts = db.query(models.Post).all()
     return posts
 
-# This endpoint creates a new post
+#============================================CREATE A POST========================================================
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.PostResponse)
 def create_post(post: schemas.PostCreate, db: Session = Depends(get_db), 
                 current_user: int = Depends(oauth2.get_current_user)):
@@ -32,7 +32,7 @@ def create_post(post: schemas.PostCreate, db: Session = Depends(get_db),
     db.refresh(new_post)  
     return new_post
 
-# This endpoint retrieves a specific post by its ID
+#=============================================GET A POST========================================================
 @router.get("/{post_id}", response_model=schemas.PostResponse)
 def get_a_post(post_id: int, db: Session = Depends(get_db), 
                current_user: int = Depends(oauth2.get_current_user)):
@@ -43,7 +43,7 @@ def get_a_post(post_id: int, db: Session = Depends(get_db),
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                         detail=f"post with id {post_id} not found")
 
-# This endpoint deletes a post by its ID
+#=============================================DELETE A POST========================================================
 @router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(post_id: int, db: Session = Depends(get_db),
                 current_user: int = Depends(oauth2.get_current_user)):
@@ -56,7 +56,7 @@ def delete_post(post_id: int, db: Session = Depends(get_db),
     db.commit()
     return
 
-# This endpoint updates an existing post by its ID
+#=============================================UPDATE A POST========================================================
 @router.put("/{post_id}", status_code=status.HTTP_202_ACCEPTED, response_model=schemas.PostResponse)
 def update_post(post_id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db),
                 current_user: int = Depends(oauth2.get_current_user)):
@@ -65,14 +65,7 @@ def update_post(post_id: int, updated_post: schemas.PostCreate, db: Session = De
     if not post_to_update:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                             detail=f"post with id {post_id} not found")
-    # db.query(models.Post).filter(models.Post.id == post_id).update(
-    #     {
-    #         "title": post.title,
-    #         "content": post.content,
-    #         "published": post.published,
-    #         "rating": post.rating
-    #     }
-    # )
+    
     db.query(models.Post).filter(models.Post.id == post_id).update(updated_post.model_dump()) # Shortcut for the above commented code.
     db.commit()
     db.refresh(post_to_update) # post_to_update is now updated with the new values

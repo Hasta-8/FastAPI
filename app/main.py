@@ -6,7 +6,7 @@ from psycopg2.extras import RealDictCursor
 from sqlalchemy.orm import Session
 from . import models, schemas, utils
 from .database import engine, get_db
-from .routers import posts, users
+from .routers import posts, users, auth
 
 
 models.Base.metadata.create_all(bind=engine) # Create all tables in the database
@@ -15,6 +15,7 @@ app = FastAPI() # Initialize FastAPI application
 
 app.include_router(posts.router)  # Include posts router
 app.include_router(users.router)  # Include users router
+app.include_router(auth.router)  # Include authentication router
 
 # Database connection setup using psycopg2
 max_retries = 5
@@ -41,5 +42,8 @@ while retries < max_retries:
 if retries == max_retries:
     raise Exception("Could not connect to the database after several attempts.")
 
+@app.get("/root", status_code=status.HTTP_200_OK)  # This endpoint is just a test endpoint
+def read_root():
+    return {"message": "Hello, Ranchi!"}
 
 

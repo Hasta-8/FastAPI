@@ -31,3 +31,16 @@ class UserResponse(BaseModel):
 
     class Config:
         orm_mode = True  # This allows the model to be used with SQLAlchemy models
+
+# schemas for authentication ==============================================================================================
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+# Schema for JWT response sent back by API
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    id: Optional[int] = None  # User ID from the token payload

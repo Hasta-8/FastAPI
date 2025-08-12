@@ -8,6 +8,7 @@ from . import models, schemas, utils
 from .database import engine, get_db
 from .routers import posts, users, auth
 
+# watch_limit = 23254s
 
 models.Base.metadata.create_all(bind=engine) # Create all tables in the database
 
